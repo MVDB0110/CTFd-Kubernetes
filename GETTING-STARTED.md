@@ -1,6 +1,6 @@
 # 1. CTFd-Kubernetes-plugin
 
-This plugin makes it possible to deploy challenges as a container environment for every ctf attendee. This plugin is intended for plug & play use. The flow which this plugin works by consists of 4 steps. The first step is to create the namespace for the user. The namespace gets the name of "ctf-user-{user-id}-{challenge-id}". This name is for the isolation of users and their challenges from other users. The second step is to create a serviceaccount and secret. This step is for the rights that the deployment container needs. The rights consists of Kubernetes API rights and the right to use the private container registry. The second one may become optional in the future but is required for now. The third step is where a Kubernetes Job is created. CTFd listens to this job for its completion, when the job is completed succesfully the browser of the user will be notified with a 201. The last step is to request the required information of the Kubernetes cluster for the completion of the challenge (eq. nodePort, host information).
+This plugin makes it possible to deploy challenges as a container environment for every ctf attendee. This plugin is intended for plug & play use. The flow which this plugin works by consists of 4 steps. The first step is to create the namespace for the user. The namespace gets the name of "ctf-user-{user-id}-{challenge-id}". This name is for the isolation of users and their challenges from other users. The second step is to create a serviceaccount and secret. This step is for the rights that the deployment container needs. The rights consists of Kubernetes API rights and the right to use the private container registry. The second one may become optional in the future but is required for now. The third step is where a Kubernetes Job is created. CTFd listens to this job for its completion and reports back to the browser. The last step is to request the required information of the Kubernetes cluster for the completion of the challenge (eq. nodePort, host information). After each call to one of the endpoints, the clients browser will receive a 201 or 409. In case of 201 everything went okay. In case of 409 you get a Kubernetes API response from the endpoint in the response of your call to CTFd.
 
 - [1. CTFd-Kubernetes-plugin](#1-ctfd-kubernetes-plugin)
   - [1.1. Preparation](#11-preparation)
@@ -47,7 +47,8 @@ This plugin has two values which can be edited through the CTFd admin panel. The
 - Container Image
 - Registry Secret
 
-The container image is the image which will be used as deployment image. The prebuild container image for the deployment image is: "mvdb0110/helm:latest". If you want to build this image yourself, use the following link [CTFd-Kubernetes-container](https://github.com/MVDB0110/CTFd-kubernetes-container).
+The container image is the image which will be used as deployment image. The prebuild container image for the deployment image is: "mvdb0110/helm:latest". If you want to build this image yourself, use the following link [CTFd-Kubernetes-container](https://github.com/MVDB0110/CTFd-kubernetes-container). <br />
+
 The registry secret is a base 64 representation of the .dockerconfigjson file. The exact structure can be read in the Kubernetes documentation. The structure used by the developer is:
 
 ```Bash
