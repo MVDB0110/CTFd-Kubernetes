@@ -42,7 +42,7 @@ CTFd._internal.challenge.submit = function (preview) {
             return response
         }
         if (response.data.status == "already_solved") {
-            stop_deployment(user_id, nonce);
+            stop_deployment(challenge_id, user_id, nonce);
             return response
         }
         return response
@@ -82,9 +82,9 @@ function start_deployment(challenge_id, user_id, nonce) {
                                 data: JSON.stringify(json_body),
                                 headers: headers,
                                 success: function (data) {
+                                    $("#deployment").html('<button onclick="stop_deployment(' + String(challenge_id) + ',' + String(user_id) + ',' + '\'' + String(nonce) + '\'' +')" class="btn btn-outline-secondary"><i class="fas fa-play"></i> Stop Challenge</button>');
                                     var myWindow = window.open("", "challenge-" + json_body["challenge_id"], "width=800,height=600");
                                     myWindow.document.write("<pre>" + JSON.stringify(data, undefined, 4) + "</pre>");
-                                    $("#deployment").html("");
                                 },
                                 error: function (data) { $('#deployment').html('<div class="text-center">Cannot get your challenge environment information.</div>'); return },
                                 dataType: 'json'
@@ -104,8 +104,8 @@ function start_deployment(challenge_id, user_id, nonce) {
 
 };
 
-function stop_deployment(user_id, nonce) {
-    json_body = { "user_id": user_id }
+function stop_deployment(challenge_id, user_id, nonce) {
+    json_body = { "challenge_id": challenge_id, "user_id": user_id }
     headers = { "CSRF-Token": nonce, 'Content-Type': 'application/json' }
     $.ajax({
         type: 'POST',
