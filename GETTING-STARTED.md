@@ -1,0 +1,91 @@
+# 1. CTFd-Kubernetes-plugin
+
+This plugin makes it possible to deploy challenges as a container environment for every ctf attendee. This plugin is intended for plug & play use. The flow which this plugin works by consists of 4 steps. The first step is to create the namespace for the user. The namespace gets the name of "ctf-user-{user-id}-{challenge-id}". This name is for the isolation of users and their challenges from other users. The second step is to create a serviceaccount and secret. This step is for the rights that the deployment container needs. The rights consists of Kubernetes API rights and the right to use the private container registry. The second one may become optional in the future but is required for now. The third step is where a Kubernetes Job is created. CTFd listens to this job for its completion, when the job is completed succesfully the browser of the user will be notified with a 201. The last step is to request the required information of the Kubernetes cluster for the completion of the challenge (eq. nodePort, host information).
+
+- [1. CTFd-Kubernetes-plugin](#1-ctfd-kubernetes-plugin)
+  - [1.1. Preparation](#11-preparation)
+  - [1.2. Installation](#12-installation)
+    - [1.2.1. Dev-machine](#121-dev-machine)
+    - [1.2.2. Kubernetes](#122-kubernetes)
+    - [1.2.3. Configuration values](#123-configuration-values)
+- [2. Appendix](#2-appendix)
+  - [2.1 RBAC](#21-rbac)
+
+## 1.1. Preparation
+
+Make sure the node that will make API calls to Kubernetes has access to Kubernetes [Kubectl](https://kubernetes.io/docs/tasks/tools/). In case of in-cluster CTFd you don't have to setup kubectl.
+
+## 1.2. Installation
+
+### 1.2.1. Dev-machine
+
+Make sure you install all requirements for CTFd through pip on the machine or in your virtual environment. Before you install all the requirements add: "kubernetes" to requirements.txt or requirements.in. After that execute the following commands:
+```Bash
+cd /path/to/CTFd-root
+pip install -r ./requirements.in
+```
+
+After installation of the pip requirement you can place the contents of the repository under: "CTFd/plugins/kubernetes/". Lastly you can proceed to start CTFd like you usually would on the local machine. NOTE: do not connect to CTFd using "localhost" or "127.0.0.1". Instead use the IP-adres of the local-machine, which the device has got from your router (eq. 192.168.2.25).
+
+```Bash
+cd /path/to/CTFd-root
+flask run -h 0.0.0.0
+```
+
+### 1.2.2. Kubernetes
+
+In the case of in-cluster deployment of this plugin, make sure you have installed "kubernetes" through pip in the CTFd image. This can be achieved by adding "kubernetes" to CTFd/requirements.txt or CTFd/requirements.in.
+
+After installation of the pip requirement you can place the contents of the repository under: "CTFd/plugins/kubernetes/". When the directory structure is in order you can start the build of your Docker image. Make sure this image is available to your Kubernetes cluster.
+
+When CTFd is deployed in Kubernetes, make sure you have confirmed that RBAC is configured for CTFd. The rights neccessary for this plugin are placed in the appendix. Beside this you can proceed to deploy CTFd like you usually would on Kubernetes.
+
+### 1.2.3. Configuration values
+
+This plugin has two values which can be edited through the CTFd admin panel. The page in the admin panel can be found under Admin Panel > Plugins > Kubernetes.
+
+- Container Image
+- Registry Secret
+
+The container image is the image which will be used as deployment image. The prebuild container image for the deployment image is: "mvdb0110/helm:latest". If you want to build this image yourself, use the following link [CTFd-Kubernetes-container](https://github.com/MVDB0110/CTFd-kubernetes-container).
+The registry secret is a base 64 representation of the .dockerconfigjson file. The exact structure can be read in the Kubernetes documentation. The structure used by the developer is:
+
+```Bash
+{"auths": {"https://registry.gitlab.com": {"username": "username", "password": "password", "email": "example@github.com", "auth": "base64(username:password)"}}}
+```
+
+This hash needs to be base 64 encoded with UTF-8.
+
+# 2. Appendix
+## 2.1 RBAC
+
+The following resources in Kubernetes need to be in order for the plugin to work. The service account will be bound to CTFd. All of these resources need to be created in the same namespace as CTFd.
+```Bash
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {serviceaccount}
+  namespace: {namespace}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {clusterrole}
+rules:
+- apiGroups: ["", "apps", "batch", "rbac.authorization.k8s.io"]
+  resources: ["pods", "namespaces", "services", "deployments", "jobs", "roles", "rolebindings", "nodes", "secrets"]
+  verbs: ["get", "list", "create", "update", "patch", "watch", "delete", "deletecollection"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {clusterrolebinding }
+subjects:
+- kind: ServiceAccount
+  name: {service account}
+  namespace: {namespace}
+roleRef:
+  kind: ClusterRole
+  name: {clusterrole}
+  apiGroup: rbac.authorization.k8s.io
+```
