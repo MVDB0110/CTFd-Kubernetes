@@ -25,7 +25,15 @@ cd /path/to/CTFd-root
 pip install -r ./requirements.in
 ```
 
-After installation of the pip requirement you can place the contents of the repository under: "CTFd/plugins/kubernetes/". Lastly you can proceed to start CTFd like you usually would on the local machine. NOTE: do not connect to CTFd using "localhost" or "127.0.0.1". Instead use the IP-adres of the local-machine, which the device has got from your router (eq. 192.168.2.25).
+After installation of the pip requirement you can place the contents of the repository under: "CTFd/plugins/kubernetes/". The contents can be downloaded either through git clone:
+```Bash
+cd /path/to/CTFd-root/CTFd/plugins/
+git clone https://github.com/MVDB0110/CTFd-Kubernetes
+mv CTFd-kubernetes kubernetes
+rm -rf ./kubernetes/.git
+pip install -r kubernetes/requirements.txt
+```
+Or by downloading the source code of master through the browser. Lastly you can proceed to start CTFd like you usually would on the local machine. NOTE: do not connect to CTFd using "localhost" or "127.0.0.1". Instead use the IP-adres of the local-machine, which the device has got from your router (eq. 192.168.2.25).
 
 ```Bash
 cd /path/to/CTFd-root
@@ -36,7 +44,15 @@ flask run -h 0.0.0.0
 
 In the case of in-cluster deployment of this plugin, make sure you have installed "kubernetes" through pip in the CTFd image. This can be achieved by adding "kubernetes" to CTFd/requirements.txt or CTFd/requirements.in.
 
-After installation of the pip requirement you can place the contents of the repository under: "CTFd/plugins/kubernetes/". When the directory structure is in order you can start the build of your Docker image. Make sure this image is available to your Kubernetes cluster.
+After installation of the pip requirements you can place the contents of the repository under: "CTFd/plugins/kubernetes/".
+```Bash
+cd /path/to/CTFd-root/CTFd/plugins/
+git clone https://github.com/MVDB0110/CTFd-Kubernetes
+mv CTFd-kubernetes kubernetes
+rm -rf ./kubernetes/.git
+```
+
+When the directory structure is in order you can start the build of your Docker image. Make sure this image is available to your Kubernetes cluster.
 
 When CTFd is deployed in Kubernetes, make sure you have confirmed that RBAC is configured for CTFd. The rights neccessary for this plugin are placed in the appendix. Beside this you can proceed to deploy CTFd like you usually would on Kubernetes.
 
