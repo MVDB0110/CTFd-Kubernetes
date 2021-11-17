@@ -28,7 +28,7 @@ virtualenv env/
 source ./env/bin/activate
 ```
 
-Make sure you install all requirements for CTFd through pip on the machine or in your virtual environment. Before you install all the requirements add: "kubernetes" to requirements.txt or requirements.in. After that execute the following commands:
+Make sure you install all requirements for CTFd through pip on the machine or in your virtual environment:
 ```Bash
 cd /path/to/CTFd-root
 pip install -r ./requirements.in
