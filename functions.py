@@ -18,10 +18,10 @@ def create_namespace(api_instance, namespace):
         }
         return return_object
 
-    except:
+    except Exception as e:
         return_object = {
             "status": False,
-            "message": "Namespace creation failed.",
+            "message": str(e),
             "detail": namespace
         }
         return return_object
@@ -34,10 +34,10 @@ def create_docker_secret(api_instance, encoded_secret, namespace):
         name="private-registry"), type="kubernetes.io/dockerconfigjson", data=data)
     try:
         api_instance.create_namespaced_secret(namespace=namespace, body=secret)
-    except:
+    except Exception as e:
         return_object = {
             "status": False,
-            "message": "Secret creation failed.",
+            "message": str(e),
             "detail": secret
         }
         return return_object
@@ -61,10 +61,14 @@ def create_docker_secret(api_instance, encoded_secret, namespace):
             }
         }
         return return_object
-    except:
+    except Exception as e:
         return_object = {
             "status": False,
-            "message": "Cannot update serviceaccount."
+            "message": str(e),
+            "detail": {
+                "secret": secret,
+                "service_account": updated_service_account
+            }
         }
         return return_object
 
@@ -111,10 +115,10 @@ def create_rbac(api_client, core_v1, rbac_v1, namespace):
         api_response = core_v1.create_namespaced_service_account(
             namespace, service_account)
         service_account = api_client.sanitize_for_serialization(api_response)
-    except:
+    except Exception as e:
         return_object = {
             "status": False,
-            "message": "Cannot create serviceaccount.",
+            "message": str(e),
             "detail": service_account
         }
         return return_object
@@ -132,10 +136,10 @@ def create_rbac(api_client, core_v1, rbac_v1, namespace):
         # Create role in namespace of player
         api_response = rbac_v1.create_namespaced_role(namespace, role)
         role = api_client.sanitize_for_serialization(api_response)
-    except:
+    except Exception as e:
         return_object = {
             "status": False,
-            "message": "Role creation failed.",
+            "message": str(e),
             "detail": role
         }
         return return_object
@@ -152,10 +156,10 @@ def create_rbac(api_client, core_v1, rbac_v1, namespace):
         api_response = rbac_v1.create_namespaced_role_binding(namespace=namespace,
                                                               body=role_binding)
         role_binding = api_client.sanitize_for_serialization(api_response)
-    except:
+    except Exception as e:
         return_object = {
             "status": False,
-            "message": "RoleBinding creation failed.",
+            "message": str(e),
             "detail": role_binding
         }
         return return_object
@@ -202,10 +206,10 @@ def create_job(api_instance, job, namespace):
                 }
                 return return_object
 
-    except:
+    except Exception as e:
         return_object = {
             "status": False,
-            "message": "Cannot create job.",
+            "message": str(e),
             "detail": job
         }
         return return_object
@@ -221,10 +225,10 @@ def delete_all(api_instance, namespace):
         }
         return return_object
 
-    except:
+    except Exception as e:
         return_object = {
             "status": False,
-            "message": "Cannot delete namespace."
+            "message": str(e)
         }
         return return_object
 
@@ -242,10 +246,10 @@ def list_nodes(api_client, api_instance):
         }
         return return_object
 
-    except:
+    except Exception as e:
         return_object = {
             "status": False,
-            "message": "Cannot get nodes.",
+            "message": str(e),
         }
         return return_object
 
@@ -264,9 +268,9 @@ def list_services(api_client, api_instance, namespace):
         }
         return return_object
 
-    except:
+    except Exception as e:
         return_object = {
             "status": False,
-            "message": "Cannot get services.",
+            "message": str(e),
         }
         return return_object
