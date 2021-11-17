@@ -2,12 +2,7 @@
 Getting started - Container Challenges
 Getting started with container-based challenges
 
-Make your own CTF challenge
-Try to think of a basic CTF challenge that somebody else must be able to solve.
-
-Design and make a static text or upload based challenge first and save it in CTFd.
-Move on to creating a container-based challenge.
-
+![image info](/challenge.png "Challenge infrastructure")
 
 Instructions container-based challenge
 1. Create a dockerfile for the container(s) you want to include in the challenge. Note: All necessary files that it interacts with, must be included in the image.
