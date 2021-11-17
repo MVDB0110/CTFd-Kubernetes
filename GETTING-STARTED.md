@@ -13,13 +13,13 @@ This plugin makes it possible to deploy challenges as a container environment fo
 
 ## 1.1. Preparation
 
-Make sure the node that will make API calls to Kubernetes has access to Kubernetes [Virtualenv](https://virtualenv.pypa.io/en/latest/installation.html). In case of in-cluster CTFd you don't have to setup kubectl.
+Make sure the node that will make API calls to Kubernetes has access to Kubernetes [Kubectl](https://kubernetes.io/docs/tasks/tools/). In case of in-cluster CTFd you don't have to setup kubectl.
 
 ## 1.2. Installation
 
 ### 1.2.1. Dev-machine
 
-> It is strongly recommended you install all the requirements in a virtual environment [Kubectl](https://kubernetes.io/docs/tasks/tools/)
+> It is strongly recommended you install all the requirements in a virtual environment [Virtualenv](https://virtualenv.pypa.io/en/latest/installation.html).
 
 Make sure you install all requirements for CTFd through pip on the machine or in your virtual environment. Before you install all the requirements add: "kubernetes" to requirements.txt or requirements.in. After that execute the following commands:
 ```Bash
