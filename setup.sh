@@ -11,7 +11,7 @@ pip install -r ./requirements.in
 
 cd ./CTFd/plugins/
 git clone https://github.com/MVDB0110/CTFd-Kubernetes
-mv CTFd-kubernetes kubernetes
+mv CTFd-Kubernetes kubernetes
 rm -rf ./kubernetes/.git
 pip install -r kubernetes/requirements.txt
 
