@@ -82,9 +82,8 @@ function start_deployment(challenge_id, user_id, nonce) {
                                 data: JSON.stringify(json_body),
                                 headers: headers,
                                 success: function (data) {
-                                    $("#deployment").html('<button onclick="stop_deployment(' + String(challenge_id) + ',' + String(user_id) + ',' + '\'' + String(nonce) + '\'' +')" class="btn btn-outline-secondary"><i class="fas fa-play"></i> Stop Challenge</button>');
-                                    var myWindow = window.open("", "challenge-" + json_body["challenge_id"], "width=800,height=600");
-                                    myWindow.document.write("<pre>" + JSON.stringify(data, undefined, 4) + "</pre>");
+                                    $("#deployment").html('<div><button onclick="stop_deployment(' + String(challenge_id) + ',' + String(user_id) + ',' + '\'' + String(nonce) + '\'' +')" class="btn btn-outline-secondary"><i class="fas fa-play"></i> Stop Challenge</button><div><div class="table-responsive" id="deployinfo"></div>');
+                                    create_table(data);
                                 },
                                 error: function (data) { $('#deployment').html('<div class="text-center">Cannot get your challenge environment information.</div>'); return },
                                 dataType: 'json'
@@ -116,4 +115,138 @@ function stop_deployment(challenge_id, user_id, nonce) {
         headers: headers,
         dataType: 'json'
     });
+};
+
+function create_table(data) {
+    // Create table from info endpoint.
+    for (let k in data) {
+        // For every key in dictionary from data.
+        if (k === "nodes") {
+            // If key is nodes create table
+            var div = document.getElementById('deployinfo');
+            var nodes = document.createElement('table');
+            nodes.classList.add("table");
+            nodes.id = "nodestable";
+
+            // Insert thead
+            var thead = document.createElement('thead');
+            thead.classList.add("thead-light");
+
+            // Insert tbody
+            var tbody = document.createElement('tbody');
+
+            // Insert tablerow for thead and create name cell
+            var tr = document.createElement('tr');
+            var name = document.createElement('th');
+            var nametext = document.createTextNode("Name");
+            name.setAttribute("data-field", "name");
+            name.appendChild(nametext);
+
+            // Insert addresses cell
+            var addresses = document.createElement('th');
+            var addresstext = document.createTextNode("Addresses");
+            addresses.setAttribute("data-field", "addresses");
+            addresses.appendChild(addresstext);
+
+            // Add cells and row to thead. Add thead to table.
+            tr.appendChild(name);
+            tr.appendChild(addresses);
+            thead.appendChild(tr);
+            nodes.appendChild(thead);
+
+            // Insert tbody
+            for (const node of data[k]) {
+                var tr = document.createElement('tr');
+
+                // Insert name cell
+                var name = document.createElement('td');
+                var nametext = document.createTextNode(node["name"]);
+                name.appendChild(nametext);
+
+                // Insert addresses cell
+                var addresses = document.createElement('td');
+                var addresstext = document.createTextNode(JSON.stringify(node["addresses"]));
+                addresses.appendChild(addresstext);
+
+                // Add cells and row to tbody.
+                tr.appendChild(name);
+                tr.appendChild(addresses);
+                tbody.appendChild(tr);
+            };
+
+            // Add tbody to table. Add table to div.
+            nodes.appendChild(tbody);
+            div.appendChild(nodes);
+        };
+        if (k === "services") {
+            // If key is services create table
+            var div = document.getElementById('deployinfo');
+            var services = document.createElement('table');
+            services.classList.add("table");
+            services.id = "servicestable";
+
+            // Insert thead
+            var thead = document.createElement('thead');
+            thead.classList.add("thead-light");
+
+            // Insert tbody
+            var tbody = document.createElement('tbody');
+
+            // Insert tablerow for thead and create name cell
+            var tr = document.createElement('tr');
+            var name = document.createElement('th');
+            var nametext = document.createTextNode("Name");
+            name.setAttribute("data-field", "name");
+            name.appendChild(nametext);
+
+            // Insert ports cell
+            var port = document.createElement('th');
+            var porttext = document.createTextNode("Ports");
+            port.setAttribute("data-field", "ports");
+            port.appendChild(porttext);
+
+            // Insert clusterip cell
+            var clusterip = document.createElement('th');
+            var iptext = document.createTextNode("ClusterIP");
+            clusterip.setAttribute("data-field", "clusterIP");
+            clusterip.appendChild(iptext);
+
+            // Add cells and row to thead. Add thead to table.
+            tr.appendChild(name);
+            tr.appendChild(clusterip);
+            tr.appendChild(port);
+            thead.appendChild(tr);
+            services.appendChild(thead);
+
+            // Insert tbody
+            for (const service of data[k]) {
+                var tr = document.createElement('tr');
+
+                // Insert name cell
+                var name = document.createElement('td');
+                var nametext = document.createTextNode(service["name"]);
+                name.appendChild(nametext);
+
+                // Insert port cell
+                var port = document.createElement('td');
+                var porttext = document.createTextNode(JSON.stringify(service["ports"]));
+                port.appendChild(porttext);
+
+                // Insert clusterip cell
+                var clusterip = document.createElement('td');
+                var iptext = document.createTextNode(service["clusterIP"]);
+                clusterip.appendChild(iptext);
+
+                // Add cells and row to tbody.
+                tr.appendChild(name);
+                tr.appendChild(clusterip);
+                tr.appendChild(port);
+                tbody.appendChild(tr);
+            };
+
+            // Add tbody to table. Add table to div.
+            services.appendChild(tbody);
+            div.appendChild(services);
+        };
+    };    
 };
