@@ -72,7 +72,7 @@ This plugin has two values which can be edited through the CTFd admin panel. The
 - Container Image
 - Registry Secret
 
-The container image is the image which will be used as deployment image. The prebuild container image for the deployment image is: "mvdb0110/helm:latest". If you want to build this image yourself, use the following link [CTFd-Kubernetes-container](https://github.com/MVDB0110/CTFd-kubernetes-container). <br />
+The container image is the image which will be used as deployment image. The prebuild container image for the deployment image is: "ghcr.io/mvdb0110/ctfd-kubernetes-container:master". If you want to build this image yourself, use the following link [CTFd-Kubernetes-container](https://github.com/MVDB0110/CTFd-kubernetes-container). <br />
 
 The registry secret is a base 64 representation of the .dockerconfigjson file. The exact structure can be read in the Kubernetes documentation. The structure used by the developer is:
 
