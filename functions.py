@@ -64,19 +64,15 @@ def create_docker_secret(api_instance, encoded_secret, namespace):
     except Exception as e:
         return_object = {
             "status": False,
-            "message": str(e),
-            "detail": {
-                "secret": secret,
-                "service_account": updated_service_account
-            }
+            "message": str(e)
         }
         return return_object
 
 
-def create_job_object(job_name, compose_uri, compose_file, image, san):
+def create_job_object(job_name, compose, compose_file, image, san):
     # Create environment for container
     env_list = []
-    env_list.append(client.V1EnvVar(name="URI", value=compose_uri))
+    env_list.append(client.V1EnvVar(name="ENCODED", value=compose))
     env_list.append(client.V1EnvVar(name="FILE", value=compose_file))
 
     # Create and configure a container section
