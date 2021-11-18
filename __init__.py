@@ -46,17 +46,6 @@ def load(app):
             KubernetesConfig.id.desc()).first()
         return render_template("kubernetes_config.html", config=config)
 
-    @kubernetes.route("/challenges/<challenge_id>/compose")
-    def compose(challenge_id):
-        compose = app.db.session.query(
-            KubernetesChallenge.compose).filter_by(id=challenge_id).scalar()
-
-        base64_bytes = compose.encode('ascii')
-        message_bytes = base64.b64decode(base64_bytes)
-        message = message_bytes.decode('ascii')
-
-        return message
-
     @kubernetes.route("/kubernetes/deploy/namespace", methods=["POST"])
     def deploy_namespace():
         # Get data
@@ -126,15 +115,18 @@ def load(app):
         challenge_name = app.db.session.query(
             KubernetesChallenge.name).filter_by(id=challenge_id).scalar()
         challenge_name = challenge_name.lower()
+        compose = app.db.session.query(
+            KubernetesChallenge.compose).filter_by(id=challenge_id).scalar()
+
+        #compose_uri = url_for("kubernetes.compose",
+        #                     challenge_id=challenge_id, _external=True, _scheme=Request.scheme)
+        job_name = str(challenge_name).replace(" ", "")
         compose_file = str(challenge_name) + ".yml"
-        compose_uri = url_for("kubernetes.compose",
-                              challenge_id=challenge_id, _external=True, _scheme=Request.scheme)
-        job_name = compose_file.split(".")[0]
 
         retries = retry_attempts
         while retries > 0:
             completion_job = create_job(batch_v1, create_job_object(
-                job_name, compose_uri, compose_file, config.image, role_name), namespace)
+                job_name, compose, compose_file, config.image, role_name), namespace)
             if completion_job['status'] is True:
                 break
             else:
