@@ -117,7 +117,7 @@ def load(app):
         compose = app.db.session.query(
             KubernetesChallenge.compose).filter_by(id=challenge_id).scalar()
         job_name = str(challenge_name).replace(" ", "-")
-        compose_file = str(challenge_name) + ".yml"
+        compose_file = str(job_name) + ".yml"
 
         retries = retry_attempts
         while retries > 0:
