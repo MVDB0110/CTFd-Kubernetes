@@ -2,7 +2,7 @@
 
 cd $1
 
-pip install virtualenv
+sudo apt install python3-virtualenv
 git clone https://github.com/CTFd/CTFd.git
 cd ./CTFd
 virtualenv env/
