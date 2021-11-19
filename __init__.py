@@ -1,4 +1,3 @@
-from flask.wrappers import Request
 from CTFd.plugins.challenges import CHALLENGE_CLASSES
 from CTFd.plugins import register_plugin_assets_directory
 from flask.templating import render_template
@@ -117,10 +116,7 @@ def load(app):
         challenge_name = challenge_name.lower()
         compose = app.db.session.query(
             KubernetesChallenge.compose).filter_by(id=challenge_id).scalar()
-
-        #compose_uri = url_for("kubernetes.compose",
-        #                     challenge_id=challenge_id, _external=True, _scheme=Request.scheme)
-        job_name = str(challenge_name).replace(" ", "")
+        job_name = str(challenge_name).replace(" ", "-")
         compose_file = str(challenge_name) + ".yml"
 
         retries = retry_attempts
