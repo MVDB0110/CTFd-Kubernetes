@@ -3,7 +3,7 @@
 cd $1
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  sudo apt install python3-virtualenv
+  sudo apt install -y python3-virtualenv
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   pip install virtualenv
 fi
