@@ -6,6 +6,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   sudo apt install python3-virtualenv
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   pip install virtualenv
+fi
 
 git clone https://github.com/CTFd/CTFd.git
 cd ./CTFd
