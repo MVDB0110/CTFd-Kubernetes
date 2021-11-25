@@ -43,7 +43,9 @@ def load(app):
             app.db.session.commit()
         config = KubernetesConfig.query.order_by(
             KubernetesConfig.id.desc()).first()
-        return render_template("kubernetes_config.html", config=config)
+        response = core_v1.list_namespace()
+        namespaces = response.items
+        return render_template("kubernetes_config.html", config=config, namespaces=namespaces)
 
     @kubernetes.route("/kubernetes/deploy/namespace", methods=["POST"])
     def deploy_namespace():
