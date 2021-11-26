@@ -1,0 +1,86 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<div class="jumbotron">
+    <div class="container">
+        <h1>Kubernetes Dashboard</h1>
+    </div>
+</div>
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">User</th>
+                <th scope="col">Challenge</th>
+                <th scope="col">Terminate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for namespace in namespaces %}
+            {% set challist = namespace.metadata.name.split('-') %}
+            {% if challist[0] == "ctf" %}
+            {% if namespace.status.phase == "Active" %}
+            <tr>
+                <td>{{ challist[2] }}</td>
+                <td>{{ challist[3] }}</td>
+                <td><button onclick="load_confirm_modal('{{namespace.metadata.name }}', '{{ challist[3] }}' , '{{ challist[2]}}', '{{ Session.nonce }}')" type="button" class="btn btn-danger">X</button></td>
+            </tr>
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div id="confirm" class="modal fade" tabindex="-1" role="dialog" aria-modal="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Terminate namespace</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">×</span> </button>
+			</div>
+			<div class="modal-body">
+                <div class="small-6 small-centered text-center columns">
+                    <p>Are you sure you want to terminate <strong id="confirm-namespace-name"></strong>?</p>
+                </div>
+                <form method="POST">
+                    <input type="hidden" id="challenge_id" />
+                    <input type="hidden" id="user_id" />
+                    <input type="hidden" id="nonce" />
+                </form>
+			</div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-danger">No</button>
+                <button type="button" id="confirm-namespace" class="btn btn-primary">Yes</button>
+            </div>
+		</div>
+	</div>
+</div>
+{% endblock content %}
+{% block scripts %}
+<script>
+    function load_confirm_modal(namespace, challenge_id, user_id, nonce){
+        var modal = $('#confirm');
+        modal.find('#confirm-namespace-name').text(namespace);
+        $('#user_id').val(user_id);
+        $('#challenge_id').val(challenge_id);
+        $('#nonce').val(nonce);
+        $('#confirm').modal('show');
+    }
+
+    document.getElementById('confirm-namespace').onclick = function(e) {
+        e.preventDefault();
+        var challenge_id = $('#challenge_id').val()
+        var user_id = $('#user_id').val()
+        var nonce = $('#nonce').val()
+        json_body = { "challenge_id": challenge_id, "user_id": user_id }
+        headers = { "CSRF-Token": nonce, 'Content-Type': 'application/json' }
+        $.ajax({
+            type: 'POST',
+            url: '/kubernetes/destroy',
+            data: JSON.stringify(json_body),
+            success: function (data) { location.reload() },
+            headers: headers,
+            dataType: 'json'
+        });
+    };
+</script>
+{% endblock %}
