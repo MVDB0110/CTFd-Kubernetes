@@ -9,6 +9,8 @@ import time
 import base64
 from .models import KubernetesChallenge, KubernetesChallengeType, KubernetesConfig
 from .functions import create_namespace, create_job_object, create_job, delete_all, list_nodes, list_services, create_rbac, create_docker_secret
+from collections import namedtuple
+import json
 
 
 # Init Kubernetes Python SDK
@@ -27,13 +29,30 @@ rbac_v1 = client.RbacAuthorizationV1Api()
 prefix = "ctf-user-"
 retry_attempts = 3
 
+Menu = namedtuple("Menu", ["title", "route"])
+
 
 def load(app):
     app.db.create_all()
     kubernetes = Blueprint('kubernetes', __name__,
                            template_folder='templates', static_folder='assets')
 
-    @kubernetes.route("/admin/kubernetes", methods=["POST", "GET"])
+    config_list = [
+        {
+            "name": "Namespaces",
+            "route": "/admin/kubernetes/namespaces"
+        },
+        {
+            "name": "Cluster",
+            "route": "/admin/kubernetes/config"
+        }
+    ]
+
+    for item in config_list:
+        config = Menu(title=item['name'], route=item['route'])
+        app.admin_plugin_menu_bar.append(config)
+
+    @kubernetes.route("/admin/kubernetes/config", methods=["POST", "GET"])
     @admins_only
     def kubernetes_config():
         if request.method == "POST":
@@ -43,9 +62,14 @@ def load(app):
             app.db.session.commit()
         config = KubernetesConfig.query.order_by(
             KubernetesConfig.id.desc()).first()
+        return render_template("plugin-config.html", config=config)
+
+    @kubernetes.route("/admin/kubernetes/namespaces", methods=["POST", "GET"])
+    @admins_only
+    def kubernetes_namespaces():
         response = core_v1.list_namespace()
         namespaces = response.items
-        return render_template("kubernetes_config.html", config=config, namespaces=namespaces)
+        return render_template("namespaces.html", namespaces=namespaces)
 
     @kubernetes.route("/kubernetes/deploy/namespace", methods=["POST"])
     def deploy_namespace():
