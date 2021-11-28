@@ -70,10 +70,11 @@ This plugin has two values which can be edited through the CTFd admin panel. The
 
 The container image is the image which will be used as deployment image. The prebuild container image for the deployment image is: "ghcr.io/mvdb0110/ctfd-kubernetes-container:master". If you want to build this image yourself, use the following link [CTFd-Kubernetes-container](https://github.com/MVDB0110/CTFd-kubernetes-container). <br />
 
-The registry secret is a base 64 representation of the .dockerconfigjson file. The exact structure can be read in the Kubernetes documentation. The structure used by the developer is:
-> In this repository there is a shellscript for the creation of this base64.
+The registry secret is a base 64 representation of the .dockerconfigjson file. The exact structure can be read in the Kubernetes documentation.
+> In this repository there is a shellscript for the creation of this base64. The syntax of this script: 
 ```Bash
-{"auths": {"https://registry.gitlab.com": {"username": "username", "password": "password", "email": "example@github.com", "auth": "base64(username:password)"}}}
+Syntax: ./base64.sh registry-url username password email
+Example: ./base64.sh https://registry.gitlab.com deploy-token secret mvdb0110@example.com
 ```
 
 This hash needs to be base 64 encoded with UTF-8.
