@@ -12,6 +12,10 @@ on:
     branches: [ master ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
+    paths-ignore:
+      - '**.md'
+      - '**.sh'
+      - '**.png'
   pull_request:
     branches: [ master ]
 
