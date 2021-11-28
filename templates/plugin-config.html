@@ -16,7 +16,7 @@
                         aria-hidden="true">×</span></button>
             </div>
             {% endfor %}
-            <form method="POST" action="{{ request.script_root }}/admin/kubernetes" enctype="multipart/form-data" autocomplete="off" class="form-horizontal">
+            <form method="POST" action="{{ request.script_root }}/admin/kubernetes/config" enctype="multipart/form-data" autocomplete="off" class="form-horizontal">
                 <div class="form-group">
                     <label for="image-input">
                         Container Image {% if config.image %} (Already uploaded a image name.) {% endif
