@@ -77,8 +77,6 @@ Syntax: ./base64.sh registry-url username password email
 Example: ./base64.sh https://registry.gitlab.com deploy-token secret mvdb0110@example.com
 ```
 
-This hash needs to be base 64 encoded with UTF-8.
-
 # 2. Appendix
 ## 2.1 RBAC
 
