@@ -13,9 +13,10 @@ This plugin makes it possible to deploy challenges as a container environment fo
 
 ## 1.1. Preparation
 
-Make sure the node that will make API calls to Kubernetes has access to Kubernetes [Kubectl](https://kubernetes.io/docs/tasks/tools/). In case of in-cluster CTFd you don't have to setup kubectl.
+Make sure the node that will make API calls to Kubernetes has access to Kubernetes [Kubectl](https://kubernetes.io/docs/tasks/tools/).
 
 ## 1.2. Installation
+The installation of the plugin is possible in two variants, a local variant and a Kubernetes variant. The Kubernetes variant is compatible with Kubernetes on Docker Desktop. After the plugin and CTFd setup there are two configuration values you must insert on the Admin Page, this is covered in paragraph 1.2.3.
 
 ### 1.2.1. Dev-machine
 
