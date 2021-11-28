@@ -53,6 +53,7 @@ flask run -h 0.0.0.0
 
 In the case of in-cluster deployment of this plugin you can follow this part.
 To do this you can apply the definition files in k8-definition, this map can be found in this repository:
+> This adds a namespace. In this namespace the following deployments are created: ctfd, db, cache.
 ```Bash
 cd /path/to/k8-definition
 kubectl apply -f .
