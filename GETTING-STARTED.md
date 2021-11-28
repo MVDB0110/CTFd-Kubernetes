@@ -65,6 +65,15 @@ When the directory structure is in order you can start the build of your Docker 
 
 When CTFd is deployed in Kubernetes, make sure you have confirmed that RBAC is configured for CTFd. The rights neccessary for this plugin are placed in the appendix. Beside this you can proceed to deploy CTFd like you usually would on Kubernetes.
 
+> You can also use the files in k8-definition to start using the container image
+
+To do this you can apply the definition files in k8-definition:
+```Bash
+cd /path/to/k8-definition
+kubectl apply -f .
+```
+Now you can connect to CTFd using a NodePort.
+
 ### 1.2.3. Configuration values
 
 This plugin has two values which can be edited through the CTFd admin panel. The page in the admin panel can be found under Admin Panel > Plugins > Kubernetes.
