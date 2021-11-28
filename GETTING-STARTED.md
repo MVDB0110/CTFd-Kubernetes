@@ -63,7 +63,7 @@ Now you can connect to CTFd using a NodePort. If you want to use an ingress reso
 
 ### 1.2.3. Configuration values
 
-This plugin has two values which can be edited through the CTFd admin panel. The page in the admin panel can be found under Admin Panel > Plugins > Kubernetes.
+This plugin has two values which can be edited through the CTFd admin panel. The page in the admin panel can be found in the navigation bar under Admin Panel > Cluster
 
 - Container Image
 - Registry Secret
