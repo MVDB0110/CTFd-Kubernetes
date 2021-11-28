@@ -17,7 +17,7 @@
         <tbody>
             {% for namespace in namespaces %}
             {% set challist = namespace.metadata.name.split('-') %}
-            {% if challist[0] == "ctf" %}
+            {% if challist[0] == "ctf" and challist[1] == "user" %}
             {% if namespace.status.phase == "Active" %}
             <tr>
                 <td>{{ challist[2] }}</td>
