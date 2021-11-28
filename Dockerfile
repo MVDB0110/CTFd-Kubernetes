@@ -6,6 +6,7 @@ USER 0
 #Setup plugin in CTFd image.
 COPY . /opt/CTFd/CTFd/plugins/kubernetes
 WORKDIR /opt/CTFd/CTFd/plugins/kubernetes
+RUN rm -rf ./k8-definition
 RUN rm -f ./GETTING-STARTED.md
 RUN rm -f ./README.md
 RUN rm -f ./*.sh
