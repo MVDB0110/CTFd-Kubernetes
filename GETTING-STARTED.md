@@ -51,28 +51,13 @@ flask run -h 0.0.0.0
 
 ### 1.2.2. Kubernetes
 
-In the case of in-cluster deployment of this plugin, make sure you have installed "kubernetes" through pip in the CTFd image. This can be achieved by adding "kubernetes" to CTFd/requirements.txt or CTFd/requirements.in.
-
-After installation of the pip requirements you can place the contents of the repository under: "CTFd/plugins/kubernetes/".
-```Bash
-cd /path/to/CTFd-root/CTFd/plugins/
-git clone https://github.com/MVDB0110/CTFd-Kubernetes
-mv CTFd-kubernetes kubernetes
-rm -rf ./kubernetes/.git
-```
-
-When the directory structure is in order you can start the build of your Docker image. Make sure this image is available to your Kubernetes cluster.
-
-When CTFd is deployed in Kubernetes, make sure you have confirmed that RBAC is configured for CTFd. The rights neccessary for this plugin are placed in the appendix. Beside this you can proceed to deploy CTFd like you usually would on Kubernetes.
-
-> You can also use the files in k8-definition to start using the container image
-
-To do this you can apply the definition files in k8-definition:
+In the case of in-cluster deployment of this plugin you can follow this part.
+To do this you can apply the definition files in k8-definition, this map can be found in this repository:
 ```Bash
 cd /path/to/k8-definition
 kubectl apply -f .
 ```
-Now you can connect to CTFd using a NodePort.
+Now you can connect to CTFd using a NodePort. If you want to use an ingress resource you must add this yourself.
 
 ### 1.2.3. Configuration values
 
@@ -94,7 +79,7 @@ This hash needs to be base 64 encoded with UTF-8.
 # 2. Appendix
 ## 2.1 RBAC
 
-The following resources in Kubernetes need to be in order for the plugin to work. The service account will be bound to CTFd. All of these resources need to be created in the same namespace as CTFd.
+The following resources in Kubernetes need to be in order for the plugin to work. The service account will be bound to CTFd. All of these resources need to be created in the same namespace as CTFd. This is applied in the k8-definition map under ctfd-deployment.yaml
 ```Bash
 apiVersion: v1
 kind: ServiceAccount
