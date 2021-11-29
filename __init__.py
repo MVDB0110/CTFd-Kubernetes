@@ -51,6 +51,15 @@ def load(app):
     for item in config_list:
         config = Menu(title=item['name'], route=item['route'])
         app.admin_plugin_menu_bar.append(config)
+        
+    config = KubernetesConfig.query.order_by(
+            KubernetesConfig.id.desc()).first()
+
+    if config is None:
+        q = KubernetesConfig(
+                image='ghcr.io/mvdb0110/ctfd-kubernetes-container:master', secret='eyJhdXRocyI6IHt9fQ==')
+        app.db.session.add(q)
+        app.db.session.commit()
 
     @kubernetes.route("/admin/kubernetes/config", methods=["POST", "GET"])
     @admins_only
