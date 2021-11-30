@@ -20,24 +20,6 @@ class KubernetesConfig(db.Model):
         super(KubernetesConfig, self).__init__(**kwargs)
 
 
-class KubernetesChallengeTracker(db.Model):
-    """
-    Kubernetes Deployment Tracker. This model stores the users/teams active resources.
-    """
-    __tablename__ = "k8chaltrack"
-    __table_args__ = (db.UniqueConstraint("id"), {})
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, index=True)
-    timestamp_start = db.Column(db.Text, index=True)
-    timestamp_stop = db.Column(db.Text, index=True, nullable=True)
-    revert_time = db.Column(db.Integer, index=True)
-    challenge_id = db.Column(db.Integer, db.ForeignKey("challenges.id"))
-
-    def __init__(self, **kwargs):
-        super(KubernetesChallengeTracker, self).__init__(**kwargs)
-
-
 class KubernetesChallenge(Challenges):
     """
         Deployment object for in database.
