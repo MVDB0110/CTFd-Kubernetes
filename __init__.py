@@ -29,37 +29,16 @@ rbac_v1 = client.RbacAuthorizationV1Api()
 prefix = "ctf-user-"
 retry_attempts = 3
 
-Menu = namedtuple("Menu", ["title", "route"])
-
-
 def load(app):
     app.db.create_all()
-    kubernetes = Blueprint('kubernetes', __name__,
-                           template_folder='templates', static_folder='assets')
 
-    config_list = [
-        {
-            "name": "Namespaces",
-            "route": "/admin/kubernetes/namespaces"
-        },
-        {
-            "name": "Cluster",
-            "route": "/admin/kubernetes/config"
-        }
-    ]
-
-    for item in config_list:
-        config = Menu(title=item['name'], route=item['route'])
-        app.admin_plugin_menu_bar.append(config)
-        
-    config = KubernetesConfig.query.order_by(
-            KubernetesConfig.id.desc()).first()
-
-    if config is None:
-        q = KubernetesConfig(
-                image='ghcr.io/mvdb0110/ctfd-kubernetes-container:master', secret='eyJhdXRocyI6IHt9fQ==')
+    if KubernetesConfig.query.order_by(KubernetesConfig.id.desc()).first() is None:
+        q = KubernetesConfig(image='ghcr.io/mvdb0110/ctfd-kubernetes-container:master', secret='eyJhdXRocyI6IHt9fQ==')
         app.db.session.add(q)
         app.db.session.commit()
+    
+    kubernetes = Blueprint('kubernetes', __name__,
+                           template_folder='templates', static_folder='assets')
 
     @kubernetes.route("/admin/kubernetes/config", methods=["POST", "GET"])
     @admins_only
@@ -88,8 +67,7 @@ def load(app):
         # Configuration values
         namespace = prefix + str(data['user_id']) + '-' + str(data['challenge_id'])
 
-
-       # Create namespace
+        # Create namespace
         retries = retry_attempts
         while retries > 0:
             creation_namespace = create_namespace(core_v1, namespace)
@@ -116,11 +94,13 @@ def load(app):
         # Configuration values
         namespace = prefix + str(data['user_id']) + '-' + str(data['challenge_id'])
 
-
+        # Create role and secret
         retries = retry_attempts
         while retries > 0:
+            # Create role in user namespace
             role_creation = create_rbac(
                 api_client, core_v1, rbac_v1, namespace)
+            # Create docker secret
             docker_secret_creation = create_docker_secret(
                 core_v1, config.secret, namespace)
             if role_creation['status'] is True and docker_secret_creation['status'] is True:
@@ -154,8 +134,10 @@ def load(app):
         job_name = str(challenge_name).replace(" ", "-")
         compose_file = str(job_name) + ".yml"
 
+        # Run job and create infrastructure
         retries = retry_attempts
         while retries > 0:
+            # Create a job for the deployment of challenge infrastructure
             completion_job = create_job(batch_v1, create_job_object(
                 job_name, compose, compose_file, config.image, role_name), namespace)
             if completion_job['status'] is True:
@@ -166,8 +148,10 @@ def load(app):
                 continue
         
         if completion_job['status'] is True:
+            # Return status object
             return jsonify({"status": completion_job['status']}), 201
         else:
+            # Return response of job
             return api_client.sanitize_for_serialization(completion_job), 409
 
     @kubernetes.route("/kubernetes/deploy/info", methods=["POST"])
@@ -177,7 +161,6 @@ def load(app):
 
         # Configuration values
         namespace = prefix + str(data['user_id']) + '-' + str(data['challenge_id'])
-
 
         # Get all services
         retries = retry_attempts
@@ -221,6 +204,7 @@ def load(app):
         else:
             info['nodes'] = api_response
 
+        # Return services and nodes to client
         return jsonify(info)
 
     @kubernetes.route("/kubernetes/destroy", methods=["POST"])
@@ -231,8 +215,10 @@ def load(app):
         # Configuration values
         namespace = prefix + str(data['user_id']) + '-' + str(data['challenge_id'])
 
+        # Delete all resources linked to user and challenge
         retries = retry_attempts
         while retries > 0:
+            # Delete namespace
             deletion = delete_all(core_v1, namespace)
             if deletion['status'] is True:
                 break
@@ -241,9 +227,20 @@ def load(app):
                 retries -= 1
                 continue
 
+        # Return response of the namespace deletion
         return jsonify(deletion)
 
+    # Setup challenge type
     CHALLENGE_CLASSES["kubedefault"] = KubernetesChallengeType
+    
+    # Setup admin panel menu bar
+    Menu = namedtuple("Menu", ["title", "route"])
+    app.admin_plugin_menu_bar.append(Menu(title="Namespaces", route="/admin/kubernetes/namespaces"))
+    app.admin_plugin_menu_bar.append(Menu(title="Cluster", route="/admin/kubernetes/config"))
+    
+    # Register assets map for plugin
     register_plugin_assets_directory(
         app, base_path="/plugins/kubernetes/assets/")
+    
+    # Register blueprint
     app.register_blueprint(kubernetes)
