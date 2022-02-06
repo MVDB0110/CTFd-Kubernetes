@@ -94,7 +94,7 @@ metadata:
   name: {clusterrole}
 rules:
 - apiGroups: ["", "apps", "batch", "rbac.authorization.k8s.io"]
-  resources: ["pods", "namespaces", "services", "deployments", "jobs", "roles", "rolebindings", "nodes", "secrets"]
+  resources: ["pods", "namespaces", "services", "deployments", "jobs", "roles", "rolebindings", "nodes", "secrets", "serviceaccounts"]
   verbs: ["get", "list", "create", "update", "patch", "watch", "delete", "deletecollection"]
 ---
 kind: ClusterRoleBinding
