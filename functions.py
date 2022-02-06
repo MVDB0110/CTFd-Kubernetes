@@ -123,6 +123,8 @@ def create_rbac(api_client, core_v1, rbac_v1, namespace):
         client.V1PolicyRule([""], resources=["pods", "services", "deployments", "secrets"], verbs=[
                             "get", "list", "create", "delete", "deletecollection", "update", "watch", "patch"], ),
         client.V1PolicyRule(["apps"], resources=["deployments"],
+                            verbs=["get", "list", "create", "delete", "deletecollection", "update", "watch", "patch"], ),
+        client.V1PolicyRule(["networking.k8s.io"], resources=["networkpolicies"], 
                             verbs=["get", "list", "create", "delete", "deletecollection", "update", "watch", "patch"], )
     ]
     role = client.V1Role(rules=rules)
