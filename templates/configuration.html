@@ -17,10 +17,10 @@
             {% endfor %}
             <form method="POST" action="{{ request.script_root }}/admin/container_challenges/configuration" enctype="multipart/form-data" autocomplete="off" class="form-horizontal">
                 <div class="form-group">
-                    <label for="registry-url">
+                    <label for="registry-image">
                         Infrastructure deployment image
                     </label>
-                    <input required class="form-control" placeholder="ghcr.io/mvdb0110/ctfd-kubernetes-container:master" type="text" name="url" id="registry-url"/>
+                    <input required class="form-control" placeholder="ghcr.io/mvdb0110/ctfd-kubernetes-container:master" type="text" name="image" id="registry-image"/>
                 </div>
                 <div class="form-group">
                     <label for="registry-url">
