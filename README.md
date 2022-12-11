@@ -1,5 +1,5 @@
 # CTFd-Kubernetes
-Getting started with container-based challenges
+Getting started with container-based challenges 
 
 ## 1. Features
 
