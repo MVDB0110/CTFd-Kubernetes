@@ -38,7 +38,19 @@
 				Docker Compose file for challenges
 			</small>
 		</label>
-		<input type="text" class="form-control" name="compose" placeholder="Enter the base64 encoded docker-compose.">
+		<textarea class="form-control" name="compose" rows="10"></textarea>
+	</div>
+	{% endblock %}
+
+	{% block challenge_type %}
+	<div class="form-group">
+		<label for="challenge_type">
+			Challenge Type
+		</label>
+		<select class="form-control custom-select" id="challenge_type" name="challenge_type">
+			<option>web</option>
+			<option>other</option>
+		</select>
 	</div>
 	{% endblock %}
 
@@ -71,7 +83,7 @@
 	{% endblock %}
 
 	{% block type %}
-	<input type="hidden" value="kubedefault" name="type" id="chaltype">
+	<input type="hidden" value="container" name="type" id="chaltype">
 	{% endblock %}
 
 	{% block submit %}

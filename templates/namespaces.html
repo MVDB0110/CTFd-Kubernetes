@@ -2,27 +2,27 @@
 {% block content %}
 <div class="jumbotron">
     <div class="container">
-        <h1>Kubernetes Namespaces</h1>
+        <h1>Container Challenge Namespaces</h1>
     </div>
 </div>
 <div class="container">
     <table class="table">
         <thead>
             <tr>
-                <th scope="col">User</th>
                 <th scope="col">Challenge</th>
-                <th scope="col">Terminate</th>
+                <th scope="col">User</th>
+                <th scope="col">Action</th>
             </tr>
         </thead>
         <tbody>
             {% for namespace in namespaces %}
             {% set challist = namespace.metadata.name.split('-') %}
-            {% if challist[0] == "ctf" and challist[1] == "user" %}
+            {% if challist[0] == "chal" and challist[1] == "user" %}
             {% if namespace.status.phase == "Active" %}
             <tr>
                 <td>{{ challist[2] }}</td>
                 <td>{{ challist[3] }}</td>
-                <td><button onclick="load_confirm_modal('{{namespace.metadata.name }}', '{{ challist[3] }}' , '{{ challist[2]}}', '{{ Session.nonce }}')" type="button" class="btn btn-danger">X</button></td>
+                <td><button onclick="load_confirm_modal('{{namespace.metadata.name }}', '{{ challist[2] }}' , '{{ challist[3]}}', '{{ Session.nonce }}')" type="button" class="btn btn-danger">X</button></td>
             </tr>
             {% endif %}
             {% endif %}
@@ -34,12 +34,12 @@
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title">Terminate namespace</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">×</span> </button>
+				<h5 class="modal-title">Namespace Termination</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">X</span> </button>
 			</div>
 			<div class="modal-body">
                 <div class="small-6 small-centered text-center columns">
-                    <p>Are you sure you want to terminate <strong id="confirm-namespace-name"></strong>?</p>
+                    <p>Are you sure you want to terminate the namespace <strong id="confirm-namespace-name"></strong>?</p>
                 </div>
                 <form method="POST">
                     <input type="hidden" id="challenge_id" />
@@ -74,12 +74,12 @@
         json_body = { "challenge_id": challenge_id, "user_id": user_id }
         headers = { "CSRF-Token": nonce, 'Content-Type': 'application/json' }
         $.ajax({
-            type: 'POST',
-            url: '/kubernetes/destroy',
-            data: JSON.stringify(json_body),
-            success: function (data) { location.reload() },
+            type: 'DELETE',
+            url: '/container_challenges/namespace',
             headers: headers,
-            dataType: 'json'
+            dataType: 'json',
+            data: JSON.stringify(json_body),
+            success: function (data) { location.reload() }
         });
     };
 </script>

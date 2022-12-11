@@ -1,252 +1,299 @@
-CTFd._internal.challenge.data = undefined
+CTFd._internal.challenge.data=void 0,CTFd._internal.challenge.renderer=CTFd.lib.markdown(),CTFd._internal.challenge.preRender=function(){},CTFd._internal.challenge.postRender=function(){},CTFd._internal.challenge.render=function(e){return CTFd._internal.challenge.renderer.render(e)},CTFd._internal.challenge.submit=function(e){var n={},l={challenge_id:parseInt(CTFd.lib.$("#challenge-id").val()),submission:CTFd.lib.$("#challenge-input").val()};return e&&(n.preview=!0),CTFd.api.post_challenge_attempt(n,l).then(function(e){return 429===e.status?e:(e.status,e)})};
 
-CTFd._internal.challenge.renderer = CTFd.lib.markdown();
+function initialize(challenge_id, user_id, nonce) {
+    
+    $('#deployment').html('<div class="text-center"><i class="fas fa-circle-notch fa-spin fa-1x"></i></div>');
 
+    headers = { "CSRF-Token": nonce, 'Content-Type': 'application/json' };
+    body = { "challenge_id": challenge_id, "user_id": user_id };
 
-CTFd._internal.challenge.preRender = function () { }
-
-CTFd._internal.challenge.render = function (markdown) {
-    return CTFd._internal.challenge.renderer.render(markdown)
+    $.ajax({
+        type: 'GET',
+        url: '/container_challenges/namespace?challenge_id=' + challenge_id + '&user_id=' + user_id,
+        headers: headers,
+        success: function (result) {
+            found = result["found"]
+            
+            if (found === "true") {                
+                $.ajax({
+                    type: 'GET',
+                    url: '/container_challenges/info?challenge_id=' + challenge_id + '&user_id=' + user_id,
+                    headers: headers,
+                    dataType: 'json',
+                    data: JSON.stringify(body),
+                    success: function (result) {
+                        $("#deployment").html('<div><button onclick="stop_challenge(' + challenge_id + ',' + user_id + ',' + '\'' + nonce + '\'' +')" class="btn btn-outline-secondary"><i class="fas fa-stop"></i> Stop Challenge</button><div><div class="table-responsive" id="deployinfo"></div>');
+                        show_info(result);
+                        return;
+                    },
+                    error: function (result) {
+                        $('#deployment').html('<div class="text-center">Cannot extract information from challenge container!</div>');
+                        return;
+                    }
+                });
+            }
+            if (found === "false") {
+                $("#deployment").html('<div><button onclick="start_challenge(' + challenge_id + ',' + user_id + ',' + '\'' + nonce + '\'' +')" class="btn btn-outline-secondary"><i class="fas fa-play"></i> Start Challenge</button><div><div class="table-responsive" id="deployinfo"></div>');
+            }
+        },
+        error: function (result) {
+            $('#deployment').html('<div class="text-center">Cannot retrieve challenge status!</div>');
+        }
+    });
 }
 
+function start_challenge(challenge_id, user_id, nonce) {
 
-CTFd._internal.challenge.postRender = function () { }
-
-
-CTFd._internal.challenge.submit = function (preview) {
-    var challenge_id = parseInt(CTFd.lib.$('#challenge-id').val())
-    var submission = CTFd.lib.$('#challenge-input').val()
-    var user_id = CTFd.lib.$('#user-id').val()
-    var nonce = CTFd.lib.$('#nonce').val()
-
-    var body = {
-        'challenge_id': challenge_id,
-        'submission': submission,
-    }
-    var params = {}
-    if (preview) {
-        params['preview'] = true
-    }
-
-    return CTFd.api.post_challenge_attempt(params, body).then(function (response) {
-        if (response.data.status === 429) {
-            // User was ratelimited but process response
-            return response
-        }
-        if (response.data.status === 403) {
-            // User is not logged in or CTF is paused.
-            return response
-        }
-        if (response.data.status == "correct") {
-            stop_deployment(challenge_id, user_id, nonce);
-            return response
-        }
-        if (response.data.status == "already_solved") {
-            stop_deployment(challenge_id, user_id, nonce);
-            return response
-        }
-        return response
-    })
-};
-
-function start_deployment(challenge_id, user_id, nonce) {
     $('#deployment').html('<div class="text-center"><i class="fas fa-circle-notch fa-spin fa-1x"></i></div>');
-    json_body = { "challenge_id": challenge_id, "user_id": user_id }
-    headers = { "CSRF-Token": nonce, 'Content-Type': 'application/json' }
+
+    headers = { "CSRF-Token": nonce, 'Content-Type': 'application/json' };
+    body = { "challenge_id": challenge_id, "user_id": user_id };
 
     $.ajax({
         type: 'POST',
-        url: '/kubernetes/deploy/namespace',
-        data: JSON.stringify(json_body),
+        url: '/container_challenges/namespace',
         headers: headers,
-        success: function (data) {
+        dataType: 'json',
+        data: JSON.stringify(body),
+        success: function (result) {
             $.ajax({
                 type: 'POST',
-                url: '/kubernetes/deploy/rbac',
-                data: JSON.stringify(json_body),
+                url: '/container_challenges/rbac',
                 headers: headers,
-                success: function (data) {
-
-                    json_body["role_name"] = data["role_name"];
-
+                dataType: 'json',
+                data: JSON.stringify(body),
+                success: function (result) {
+                    body["role_name"] = result["role_name"];
                     $.ajax({
                         type: 'POST',
-                        url: '/kubernetes/deploy/job',
-                        data: JSON.stringify(json_body),
+                        url: '/container_challenges/job',
                         headers: headers,
-                        success: function (data) {
-                            
+                        dataType: 'json',
+                        data: JSON.stringify(body),
+                        success: function (result) {
                             $.ajax({
-                                type: 'POST',
-                                url: '/kubernetes/deploy/info',
-                                data: JSON.stringify(json_body),
+                                type: 'GET',
+                                url: '/container_challenges/info?challenge_id=' + challenge_id + '&user_id=' + user_id,
                                 headers: headers,
-                                success: function (data) {
-                                    $("#deployment").html('<div><button onclick="stop_deployment(' + String(challenge_id) + ',' + String(user_id) + ',' + '\'' + String(nonce) + '\'' +')" class="btn btn-outline-secondary"><i class="fas fa-play"></i> Stop Challenge</button><div><div class="table-responsive" id="deployinfo"></div>');
-                                    create_table(data);
+                                dataType: 'json',
+                                data: JSON.stringify(body),
+                                success: function (result) {
+                                    $("#deployment").html('<div><button onclick="stop_challenge(' + challenge_id + ',' + user_id + ',' + '\'' + nonce + '\'' +')" class="btn btn-outline-secondary"><i class="fas fa-stop"></i> Stop Challenge</button><div><div class="table-responsive" id="deployinfo"></div>');
+                                    show_info(result);
+                                    return;
                                 },
-                                error: function (data) { $('#deployment').html('<div class="text-center">Cannot get your challenge environment information.</div>'); return },
-                                dataType: 'json'
+                                error: function (result) {
+                                    $('#deployment').html('<div class="text-center">Cannot extract information from challenge container!</div>');
+                                    return;
+                                }
                             });
                         },
-                        error: function (data) { $('#deployment').html('<div class="text-center">Cannot deploy the challenge deployment container.</div>'); return },
-                        dataType: 'json'
+                        error: function (result) {
+                            $('#deployment').html('<div class="text-center">Cannot deploy job in challenge container namespace!</div>');
+                            return;
+                        },
                     });
                 },
-                error: function (data) { $('#deployment').html('<div class="text-center">Cannot deploy rbac in namespace.</div>'); return },
-                dataType: 'json'
+                error: function (result) {
+                    $('#deployment').html('<div class="text-center">Cannot deploy RBAC in challenge container namespace!</div>');
+                    return;
+                },
             });
         },
-        error: function (data) { $('#deployment').html('<div class="text-center">Cannot deploy your challenge namespace.</div>'); return },
-        dataType: 'json'
+        error: function (result) {
+            $('#deployment').html('<div class="text-center">Cannot deploy challenge container namespace!</div>');
+            return;
+        }
     });
-
 };
 
-function stop_deployment(challenge_id, user_id, nonce) {
-    json_body = { "challenge_id": challenge_id, "user_id": user_id }
-    headers = { "CSRF-Token": nonce, 'Content-Type': 'application/json' }
+function stop_challenge(challenge_id, user_id, nonce) {
+
+    if (typeof challenge_id === "number") {
+        challenge_id = String(challenge_id);
+    }
+    if (typeof user_id === "number") {
+        user_id = String(user_id);
+    }
+
+    headers = { "CSRF-Token": nonce, 'Content-Type': 'application/json' };
+    body = { "challenge_id": challenge_id, "user_id": user_id };
+
     $.ajax({
-        type: 'POST',
-        url: '/kubernetes/destroy',
-        data: JSON.stringify(json_body),
-        success: function (data) { $('#deployment').html('<div class="text-center">Destroyed your challenge environment.</div>'); },
-        error: function (data) { $('#deployment').html('<div class="text-center">Cannot destroy your challenge environment.</div>'); },
+        type: 'DELETE',
+        url: '/container_challenges/namespace',
         headers: headers,
-        dataType: 'json'
+        dataType: 'json',
+        data: JSON.stringify(body),
+        success: function (result) { $('#deployment').html('<div class="text-center">Challenge container undeployed!</div>'); },
+        error: function (result) { $('#deployment').html('<div class="text-center">Cannot undeploy challenge container!</div>'); }
     });
 };
 
-function create_table(data) {
-    // Create table from info endpoint.
+function show_info(data) {
+
     for (let k in data) {
-        // For every key in dictionary from data.
+        if (k === "hyperlinks") {
+            var thead = document.createElement('thead');
+            thead.classList.add("thead-light");
+            var tbody = document.createElement('tbody');
+
+            
+            var name = document.createElement('th');
+            var nametext = document.createTextNode("Name");
+            name.setAttribute("data-field", "name");
+            name.appendChild(nametext);
+
+            var url = document.createElement('th');
+            var urltext = document.createTextNode("URL");
+            url.setAttribute("data-field", "url");
+            url.appendChild(urltext);
+            
+            var tr = document.createElement('tr');
+            tr.appendChild(name);
+            tr.appendChild(url);
+            thead.appendChild(tr);
+
+            for (const service of data[k]) {
+                var name = document.createElement('td');
+                var nametext = document.createTextNode(service["name"]);
+                name.appendChild(nametext);
+
+                var url = document.createElement('td');
+                var urltext = document.createTextNode(service["url"]);
+                url.appendChild(urltext);
+                
+                var tr = document.createElement('tr');
+                tr.appendChild(name);
+                tr.appendChild(url);
+                tbody.appendChild(tr);
+            }
+            
+            var hyperlinks = document.createElement('table');
+            hyperlinks.classList.add("table");
+            hyperlinks.id = "hyperlinkstable";
+            hyperlinks.appendChild(thead);
+            hyperlinks.appendChild(tbody);
+
+            document.getElementById('deployinfo').appendChild(hyperlinks);
+        }
+
         if (k === "nodes") {
-            // If key is nodes create table
             var div = document.getElementById('deployinfo');
             var nodes = document.createElement('table');
             nodes.classList.add("table");
             nodes.id = "nodestable";
 
-            // Insert thead
             var thead = document.createElement('thead');
             thead.classList.add("thead-light");
 
-            // Insert tbody
             var tbody = document.createElement('tbody');
 
-            // Insert tablerow for thead and create name cell
             var tr = document.createElement('tr');
             var name = document.createElement('th');
             var nametext = document.createTextNode("Name");
             name.setAttribute("data-field", "name");
             name.appendChild(nametext);
 
-            // Insert addresses cell
             var addresses = document.createElement('th');
             var addresstext = document.createTextNode("Addresses");
             addresses.setAttribute("data-field", "addresses");
             addresses.appendChild(addresstext);
 
-            // Add cells and row to thead. Add thead to table.
             tr.appendChild(name);
             tr.appendChild(addresses);
             thead.appendChild(tr);
             nodes.appendChild(thead);
 
-            // Insert tbody
             for (const node of data[k]) {
                 var tr = document.createElement('tr');
 
-                // Insert name cell
                 var name = document.createElement('td');
                 var nametext = document.createTextNode(node["name"]);
                 name.appendChild(nametext);
 
-                // Insert addresses cell
                 var addresses = document.createElement('td');
                 var addresstext = document.createTextNode(JSON.stringify(node["addresses"]));
                 addresses.appendChild(addresstext);
 
-                // Add cells and row to tbody.
                 tr.appendChild(name);
                 tr.appendChild(addresses);
                 tbody.appendChild(tr);
-            };
+            }
 
-            // Add tbody to table. Add table to div.
             nodes.appendChild(tbody);
             div.appendChild(nodes);
-        };
+        }
+
         if (k === "services") {
-            // If key is services create table
             var div = document.getElementById('deployinfo');
             var services = document.createElement('table');
             services.classList.add("table");
             services.id = "servicestable";
 
-            // Insert thead
             var thead = document.createElement('thead');
             thead.classList.add("thead-light");
 
-            // Insert tbody
             var tbody = document.createElement('tbody');
 
-            // Insert tablerow for thead and create name cell
             var tr = document.createElement('tr');
             var name = document.createElement('th');
             var nametext = document.createTextNode("Name");
             name.setAttribute("data-field", "name");
             name.appendChild(nametext);
 
-            // Insert ports cell
-            var port = document.createElement('th');
-            var porttext = document.createTextNode("Ports");
-            port.setAttribute("data-field", "ports");
-            port.appendChild(porttext);
+            var targetPort = document.createElement('th');
+            var targetPortText = document.createTextNode("targetPort");
+            targetPort.setAttribute("data-field", "ports");
+            targetPort.appendChild(targetPortText);
 
-            // Insert clusterip cell
+            var nodePort = document.createElement('th');
+            var nodePortText = document.createTextNode("nodePort");
+            nodePort.setAttribute("data-field", "ports");
+            nodePort.appendChild(nodePortText);
+
             var clusterip = document.createElement('th');
             var iptext = document.createTextNode("ClusterIP");
             clusterip.setAttribute("data-field", "clusterIP");
             clusterip.appendChild(iptext);
 
-            // Add cells and row to thead. Add thead to table.
             tr.appendChild(name);
             tr.appendChild(clusterip);
-            tr.appendChild(port);
+            tr.appendChild(targetPort);
+            tr.appendChild(nodePort);
             thead.appendChild(tr);
             services.appendChild(thead);
 
-            // Insert tbody
             for (const service of data[k]) {
                 var tr = document.createElement('tr');
 
-                // Insert name cell
                 var name = document.createElement('td');
                 var nametext = document.createTextNode(service["name"]);
                 name.appendChild(nametext);
 
-                // Insert port cell
-                var port = document.createElement('td');
-                var porttext = document.createTextNode(JSON.stringify(service["ports"]));
-                port.appendChild(porttext);
+                var targetPortInfo = document.createElement('td');
+                var targetPortInfoText = document.createTextNode(JSON.stringify(service["ports"][0]["targetPort"]));
+                targetPortInfo.appendChild(targetPortInfoText);
 
-                // Insert clusterip cell
+                var nodePortInfo = document.createElement('td');
+                var nodePortInfoText = document.createTextNode(JSON.stringify(service["ports"][0]["nodePort"]));
+                nodePortInfo.appendChild(nodePortInfoText);
+
                 var clusterip = document.createElement('td');
                 var iptext = document.createTextNode(service["clusterIP"]);
                 clusterip.appendChild(iptext);
 
-                // Add cells and row to tbody.
                 tr.appendChild(name);
                 tr.appendChild(clusterip);
-                tr.appendChild(port);
+                tr.appendChild(targetPortInfo);
+                tr.appendChild(nodePortInfo);
                 tbody.appendChild(tr);
-            };
+            }
 
-            // Add tbody to table. Add table to div.
             services.appendChild(tbody);
             div.appendChild(services);
-        };
-    };    
+        }
+    }
+
+    return;
 };
